@@ -44,6 +44,8 @@
     "codelyzer": "^4.3.0",
     "cors": "^2.8.4",
     "debug": "^3.1.0",
+    "deep-extend": "^0.6.0",
+    "dotenv": "^8.1.0",
     "express": "^4.16.3",
     "generator-tslint": "^0.1.1",
     "helmet": "^3.12.1",
