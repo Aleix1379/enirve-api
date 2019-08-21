@@ -47,7 +47,7 @@
     "express": "^4.16.3",
     "generator-tslint": "^0.1.1",
     "helmet": "^3.12.1",
-    "jwt-simple": "^0.5.1",
+    "jwt-simple": "^0.5.3",
     "merge2": "^1.2.2",
     "moment": "^2.22.1",
     "mongoose": "^5.1.1",
