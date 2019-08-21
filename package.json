@@ -33,7 +33,7 @@
     "chai": "^3.5.0",
     "chai-http": "^4.0.0",
     "gulp": "^4.0.0",
-    "gulp-typescript": "^3.1.1",
+    "gulp-typescript": "^5.0.1",
     "mocha": "^5.2.0",
     "ts-node": "^3.3.0",
     "typescript": "^2.8.3"
@@ -50,7 +50,7 @@
     "jwt-simple": "^0.5.3",
     "merge2": "^1.2.2",
     "moment": "^2.22.1",
-    "mongoose": "^5.1.1",
+    "mongoose": "^5.6.10",
     "mongoose-pagination": "^1.0.0",
     "morgan": "^1.9.1",
     "tslint-eslint-rules": "^5.3.1",
