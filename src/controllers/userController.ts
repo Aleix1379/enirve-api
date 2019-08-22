@@ -6,7 +6,6 @@ import * as fs from 'fs';
 import {User} from '../interfaces/User';
 
 const UserModel = mongoose.model('User', UserSchema);
-let user: any;
 
 export class UserController {
 
@@ -22,8 +21,8 @@ export class UserController {
                     .limit(1)
                     .then(result => {
                         let code = 1;
-                        if (result.length > 0 && result[0].code) {
-                            code = result[0].code + 1;
+                        if (result.length > 0 && result[0]['code']) {
+                            code = result[0]['code'] + 1;
                         }
 
                         let fileName: string;
@@ -33,7 +32,18 @@ export class UserController {
                             fileName = `${req.body.username}.png`;
                         }
 
-                        user = new UserModel({
+                        if (fileName !== 'default.png') {
+                            fs.writeFile(
+                                `public/images/${fileName}`,
+                                req.body.picture.replace(/^data:image\/png;base64,/, ''), 'base64', (err) => {
+                                    if (err) {
+                                        console.error(err);
+                                    }
+                                }
+                            );
+                        }
+
+                        UserModel.create({
                             progress: {
                                 points: 0,
                                 activity: [
@@ -576,27 +586,14 @@ export class UserController {
                             email: req.body.email,
                             password: hash,
                             picture: fileName,
-                        });
-
-                        if (fileName !== 'default.png') {
-                            fs.writeFile(
-                                `public/images/${fileName}`,
-                                req.body.picture.replace(/^data:image\/png;base64,/, ''), 'base64', (err) => {
-                                    if (err) {
-                                        console.error(err);
-                                    }
-                                }
-                            );
-                        }
-
-                        user.save()
+                        })
                             .then(result => {
                                 res.json({
-                                    'code': result.code,
-                                    'username': result.username,
-                                    'email': result.email,
-                                    'picture': result.picture,
-                                    'progress': result.progress
+                                    'code': result['code'],
+                                    'username': result['username'],
+                                    'email': result['email'],
+                                    'picture': result['picture'],
+                                    'progress': result['progress']
                                 });
                             })
                             .catch(err => {
@@ -622,12 +619,29 @@ export class UserController {
 
     public updateProgress(req: Request, res: Response): void {
         const points = req.body.points;
+        const activity = req.body.activity;
         const userCode = req.body.user.code;
 
         UserController.findUser('code', userCode)
             .then((user: User) => {
 
-                user.progress.points += points;
+                if (points) {
+                    user.progress.points += points;
+                }
+
+                if (activity) {
+                    const section = user.progress.activity.find(section => section.sectionId === activity.sectionId);
+                    if (section) {
+                        activity.verbs.forEach(verbId => {
+                            const verb = section.verbs.find(verb => verb.id === verbId);
+                            if (verb) {
+                                verb.completed = true;
+                            }
+                        });
+                    } else {
+                        console.warn(`Section id: ->${activity.sectionId}<- not found...`);
+                    }
+                }
 
                 UserModel.updateOne({_id: user.id}, user)
                     .then(() => {
@@ -653,7 +667,7 @@ export class UserController {
 
     private static findUser(key: string, value: string): Promise<User> {
         return new Promise<User>((resolve, reject) => {
-            UserModel.findOne({[key]: value}).exec((error, user) => {
+            UserModel.findOne({[key]: value}).exec((error, user: User) => {
                 if (error) {
                     reject(error);
                 } else if (!error && user) {

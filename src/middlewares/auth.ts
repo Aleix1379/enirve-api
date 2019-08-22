@@ -2,14 +2,14 @@ import * as jwt from 'jwt-simple';
 import * as moment from 'moment';
 import express = require('express');
 
-const secret = process.env.SECRET;
 
 const requestEnsureAuth: express.RequestHandler = (
     req: express.Request,
     res: express.Response,
     next: express.NextFunction) => {
 
-    console.log('midleware ensureAuth');
+    const secret = process.env.SECRET;
+
     let payload: any;
     let token: string;
 
@@ -24,7 +24,7 @@ const requestEnsureAuth: express.RequestHandler = (
         token = req.headers.authorization.split(' ')[1];
         payload = jwt.decode(token, secret);
         if (payload.exp <= moment().unix()) {
-            res.status(401).send({message: 'The token has expired'});
+            return res.status(401).send({message: 'The token has expired'});
         } else {
             req.body.user = payload.user;
             next();

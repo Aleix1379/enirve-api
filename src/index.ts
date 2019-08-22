@@ -33,7 +33,7 @@ mongoose.connect('mongodb://localhost:27017/enirve')
     })
     .catch(err => console.log(err));
 
-mongoose.Promise = global.Promise;
+(<any>mongoose).Promise = global.Promise;
 
 function normalizePort(val: number | string): number | string | boolean {
     let port: number = (typeof val === 'string') ? parseInt(val, 10) : val;
