@@ -14,7 +14,10 @@ export class UserRouter {
     init(): void {
         this.router.post('/', this.userController.addUser);
         this.router.get('/', this.userController.findOne);
-        this.router.put('/progress', this.userController.updateProgress)
+        this.router.get('/:id', this.userController.findUserById);
+        this.router.get('/:id/config', this.userController.findConfigByUser);
+        this.router.put('/:id/config', this.userController.updateUserConfig);
+        this.router.put('/progress', this.userController.updateProgress);
     }
 }
 

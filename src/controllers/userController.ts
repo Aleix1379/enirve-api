@@ -1,11 +1,14 @@
 import * as mongoose from 'mongoose';
-import {UserSchema} from '../models/user';
-import {Request, Response} from 'express';
-import * as bcrypt from 'bcrypt-nodejs';
 import * as fs from 'fs';
+import * as bcrypt from 'bcrypt-nodejs';
+import {Request, Response} from 'express';
 import {User} from '../interfaces/User';
+import {UserSchema} from '../models/user';
+import {ConfigSchema} from "../models/config";
+import {Config} from "../interfaces/Config";
 
 const UserModel = mongoose.model('User', UserSchema);
+const ConfigModel = mongoose.model('Config', ConfigSchema);
 
 export class UserController {
 
@@ -42,6 +45,13 @@ export class UserController {
                                 }
                             );
                         }
+
+                        ConfigModel.create({
+                            userCode: code
+                        }).catch(err => {
+                            res.statusCode = 500;
+                            return res.send(err);
+                        });
 
                         UserModel.create({
                             progress: {
@@ -597,7 +607,7 @@ export class UserController {
                                 });
                             })
                             .catch(err => {
-                                res.statusCode = 403;
+                                res.statusCode = 500;
                                 return res.send(err);
                             });
                     });
@@ -665,24 +675,75 @@ export class UserController {
 
     }
 
-    private static findUser(key: string, value: string): Promise<User> {
-        return new Promise<User>((resolve, reject) => {
-            UserModel.findOne({[key]: value}).exec((error, user: User) => {
+
+    public findUserById(req: Request, res: Response): void {
+        UserController.findUser('code', req.params.id)
+            .then(user => res.json(user))
+            .catch(error => {
+                console.error(error);
+                res.status(500).json(error)
+            });
+    }
+
+    public findConfigByUser(req: Request, res: Response): void {
+        UserController.findConfig(req.params.id)
+            .then(config => res.json(config))
+            .catch(error => {
+                console.error(error);
+                res.status(500).json(error);
+            });
+    }
+
+    public async updateUserConfig(req: Request, res: Response): Promise<any> {
+        const config: Config = await UserController.findConfig(req.params.id);
+        let keys = Object.keys(req.body);
+        keys = keys.filter(key => key !== 'user' && key !== 'userCode');
+        keys.forEach(key => {
+            config[key] = req.body[key];
+        });
+        ConfigModel.updateOne({userCode: Number(req.params.id)}, config)
+            .exec((error, config: Config) => {
                 if (error) {
-                    reject(error);
-                } else if (!error && user) {
-                    resolve({
-                        'id': user.id,
-                        'code': user.code,
-                        'username': user.username,
-                        'email': user.email,
-                        'picture': user.picture,
-                        'progress': user.progress
-                    });
-                } else if (!error && !user) {
-                    reject(error);
+                    console.error(error);
+                    res.status(500).json(error)
+                } else {
+                    res.json(config);
                 }
             });
+    }
+
+    private static findConfig(userCode: number): Promise<Config> {
+        return new Promise<Config>((resolve, reject) => {
+            ConfigModel.findOne({userCode: userCode}, {_id: 0, __v: 0})
+                .exec((error, config: Config) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(config);
+                    }
+                });
+        });
+    }
+
+    private static findUser(key: string, value: string): Promise<User> {
+        return new Promise<User>((resolve, reject) => {
+            UserModel.findOne({[key]: value})
+                .exec((error, user: User) => {
+                    if (error) {
+                        reject(error);
+                    } else if (!error && user) {
+                        resolve({
+                            'id': user.id,
+                            'code': user.code,
+                            'username': user.username,
+                            'email': user.email,
+                            'picture': user.picture,
+                            'progress': user.progress
+                        });
+                    } else if (!error && !user) {
+                        reject(error);
+                    }
+                });
         });
     }
 
