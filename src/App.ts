@@ -50,8 +50,8 @@ class App {
         //     });
         // });
         // this.express.use('/', router);
-        this.express.use('/api/v1/users', UserRouter);
-        this.express.use('/api/v1/tokens', TokenRouter);
+        this.express.use('/v1/users', UserRouter);
+        this.express.use('/v1/tokens', TokenRouter);
     }
 
 }
