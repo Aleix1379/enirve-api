@@ -45,8 +45,8 @@ class App {
         //     });
         // });
         // this.express.use('/', router);
-        this.express.use('/v1/users', UserRouter_1.default);
-        this.express.use('/v1/tokens', TokenController_1.default);
+        this.express.use('/api/v1/users', UserRouter_1.default);
+        this.express.use('/api/v1/tokens', TokenController_1.default);
     }
 }
 exports.default = new App().express;

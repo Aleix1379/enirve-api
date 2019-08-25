@@ -24,10 +24,10 @@ const requestEnsureAuth = (req, res, next) => {
         }
     }
     function withoutAuth() {
-        if ((req.originalUrl === '/v1/users' || req.originalUrl === '/v1/tokens') && req.method === 'POST') {
+        if ((req.originalUrl === '/api/v1/users' || req.originalUrl === '/api/v1/tokens') && req.method === 'POST') {
             return true;
         }
-        return req.originalUrl.includes('/v1/users') && req.method === 'GET';
+        return req.originalUrl.includes('/api/v1/users') && req.method === 'GET';
     }
 };
 module.exports = requestEnsureAuth;
