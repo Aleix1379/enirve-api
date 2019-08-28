@@ -29,13 +29,15 @@ export class UserController {
                         }
 
                         let fileName: string;
-                        if (req.body.picture === 'default.png') {
+                        const defaultImage = 'user-default.png';
+
+                        if (req.body.picture === defaultImage) {
                             fileName = req.body.picture;
                         } else {
                             fileName = `${req.body.username}.png`;
                         }
 
-                        if (fileName !== 'default.png') {
+                        if (fileName !== defaultImage) {
                             fs.writeFile(
                                 `public/images/${fileName}`,
                                 req.body.picture.replace(/^data:image\/png;base64,/, ''), 'base64', (err) => {
@@ -598,13 +600,9 @@ export class UserController {
                             picture: fileName,
                         })
                             .then(result => {
-                                res.json({
-                                    'code': result['code'],
-                                    'username': result['username'],
-                                    'email': result['email'],
-                                    'picture': result['picture'],
-                                    'progress': result['progress']
-                                });
+                                const userCreated = {...result.toObject()};
+                                delete userCreated['password'];
+                                res.json(userCreated);
                             })
                             .catch(err => {
                                 res.statusCode = 500;
@@ -658,13 +656,7 @@ export class UserController {
                         console.log(`user:`);
                         console.log(user);
                         console.log(`**************************`);
-                        res.json({
-                            'code': user.code,
-                            'username': user.username,
-                            'email': user.email,
-                            'picture': user.picture,
-                            'progress': user.progress
-                        });
+                        res.json(user);
                     })
                     .catch(err => {
                         res.statusCode = 403;
@@ -676,13 +668,17 @@ export class UserController {
     }
 
 
-    public findUserById(req: Request, res: Response): void {
-        UserController.findUser('code', req.params.id)
-            .then(user => res.json(user))
-            .catch(error => {
-                console.error(error);
-                res.status(500).json(error)
-            });
+    public async findUserById(req: Request, res: Response): Promise<void> {
+        try {
+            const user = await UserController.findUserByCode(req.params.id);
+            res.json(user);
+        } catch (err) {
+            if (err === 'User not found') {
+                res.sendStatus(404);
+            } else {
+                res.sendStatus(500).json(err);
+            }
+        }
     }
 
     public findConfigByUser(req: Request, res: Response): void {
@@ -705,9 +701,111 @@ export class UserController {
             .exec((error, config: Config) => {
                 if (error) {
                     console.error(error);
-                    res.status(500).json(error)
+                    res.status(500).json(error);
                 } else {
                     res.json(config);
+                }
+            });
+    }
+
+    public async getFriendsByUser(req: Request, res: Response) {
+        try {
+            const user = await UserController.findUserByCode(req.params.id);
+            // db.getCollection('users').find({code: {$in: [1,2,3,4,5]}}, {'progress.activity': 0})
+            UserModel.find({code: {$in: user.friends}},
+                {'progress.activity': 0, 'password': 0, '_id': 0, '__v': 0, 'validated': 0})
+                .exec((error, friends) => {
+                    if (error) {
+                        res.status(500).send(error);
+                    } else {
+                        res.json(friends.map(friend => friend.toObject()))
+                    }
+                });
+
+
+        } catch (err) {
+            if (err === 'User not found') {
+                res.sendStatus(404);
+            } else {
+                res.sendStatus(500).json(err);
+            }
+        }
+    }
+
+    public async addFriend(req: Request, res: Response) {
+        const newFriendCode: number = req.body.userCode;
+        if (!newFriendCode && isNaN(newFriendCode)) {
+            return res.sendStatus(400);
+        }
+
+        let newFriend: User;
+        try {
+            newFriend = await UserController.findUserByCode(req.body.userCode);
+        } catch (err) {
+            if (err === 'User not found') {
+                return res.status(404).send({message: `New friend -->${req.body.userCode}<-- doesn't exists`});
+            } else {
+                return res.sendStatus(500).json(err);
+            }
+        }
+
+        try {
+            const user: User = await UserController.findUserByCode(req.params.id);
+
+            if (user.code === newFriend.code) {
+                return res.status(400).send({
+                    message: `New friend has to be different that the current user -->${newFriend.code}<--`
+                });
+            }
+
+            user.friends.push(newFriend.code);
+            UserController.updateFriends(res, user);
+        } catch (err) {
+            if (err === 'User not found') {
+                res.sendStatus(404);
+            } else {
+                res.sendStatus(500).json(err);
+            }
+        }
+
+    }
+
+    public async deleteFriend(req: Request, res: Response) {
+        try {
+            const userCodeToDelete: number = Number(req.params.friendId);
+            if (!userCodeToDelete && isNaN(userCodeToDelete)) {
+                return res.sendStatus(400);
+            }
+
+            const user = await UserController.findUserByCode(req.params.id);
+
+            const oldLength = user.friends.length;
+            user.friends = user.friends.filter(friend => friend !== userCodeToDelete);
+            const newLength = user.friends.length;
+
+            if (newLength === oldLength) {
+                return res.status(404).send({message: `User with code ${userCodeToDelete} doesn't exists`});
+            }
+
+            UserController.updateFriends(res, user);
+        } catch (err) {
+            if (err === 'User not found') {
+                res.sendStatus(404);
+            } else {
+                res.sendStatus(500).json(err);
+            }
+        }
+
+    }
+
+    private static updateFriends(res: Response, user: User) {
+        UserModel.updateOne({code: user.code}, user)
+            .exec((error, result) => {
+                if (error) {
+                    console.error(error);
+                    res.status(500).json(error);
+                } else {
+                    res.json(result)
                 }
             });
     }
@@ -725,23 +823,20 @@ export class UserController {
         });
     }
 
+    private static findUserByCode(code: string): Promise<User> {
+        return UserController.findUser('code', code);
+    }
+
     private static findUser(key: string, value: string): Promise<User> {
         return new Promise<User>((resolve, reject) => {
-            UserModel.findOne({[key]: value})
-                .exec((error, user: User) => {
+            UserModel.findOne({[key]: value}, {_id: 0, __v: 0, password: 0})
+                .exec((error, user) => {
                     if (error) {
                         reject(error);
                     } else if (!error && user) {
-                        resolve({
-                            'id': user.id,
-                            'code': user.code,
-                            'username': user.username,
-                            'email': user.email,
-                            'picture': user.picture,
-                            'progress': user.progress
-                        });
+                        resolve(user.toObject());
                     } else if (!error && !user) {
-                        reject(error);
+                        reject('User not found');
                     }
                 });
         });

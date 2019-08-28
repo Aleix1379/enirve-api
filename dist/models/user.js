@@ -26,6 +26,10 @@ exports.UserSchema = new Schema({
         type: Boolean,
         default: false
     },
+    friends: {
+        type: [Number],
+        default: []
+    },
     progress: {
         points: {
             type: Number,
