@@ -704,8 +704,9 @@ class UserController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const user = yield UserController.findUserByCode(req.params.id);
-                // db.getCollection('users').find({code: {$in: [1,2,3,4,5]}}, {'progress.activity': 0})
-                UserModel.find({ code: { $in: user.friends } }, { 'progress.activity': 0, 'password': 0, '_id': 0, '__v': 0, 'validated': 0 })
+                UserModel
+                    .find({ code: { $in: user.friends } }, { 'progress.activity': 0, 'password': 0, '_id': 0, '__v': 0, 'validated': 0 })
+                    .sort({ 'progress.points': -1 })
                     .exec((error, friends) => {
                     if (error) {
                         res.status(500).send(error);
@@ -791,13 +792,13 @@ class UserController {
     }
     static updateFriends(res, user) {
         UserModel.updateOne({ code: user.code }, user)
-            .exec((error, result) => {
+            .exec((error) => {
             if (error) {
                 console.error(error);
                 res.status(500).json(error);
             }
             else {
-                res.json(result);
+                res.json(user);
             }
         });
     }

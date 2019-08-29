@@ -711,16 +711,23 @@ export class UserController {
     public async getFriendsByUser(req: Request, res: Response) {
         try {
             const user = await UserController.findUserByCode(req.params.id);
-            // db.getCollection('users').find({code: {$in: [1,2,3,4,5]}}, {'progress.activity': 0})
-            UserModel.find({code: {$in: user.friends}},
-                {'progress.activity': 0, 'password': 0, '_id': 0, '__v': 0, 'validated': 0})
-                .exec((error, friends) => {
-                    if (error) {
-                        res.status(500).send(error);
-                    } else {
-                        res.json(friends.map(friend => friend.toObject()))
+            UserModel
+                .find(
+                    {code: {$in: user.friends}},
+                    {'progress.activity': 0, 'password': 0, '_id': 0, '__v': 0, 'validated': 0}
+                )
+                .sort(
+                    {'progress.points': -1}
+                )
+                .exec(
+                    (error, friends) => {
+                        if (error) {
+                            res.status(500).send(error);
+                        } else {
+                            res.json(friends.map(friend => friend.toObject()));
+                        }
                     }
-                });
+                );
 
 
         } catch (err) {
@@ -800,12 +807,12 @@ export class UserController {
 
     private static updateFriends(res: Response, user: User) {
         UserModel.updateOne({code: user.code}, user)
-            .exec((error, result) => {
+            .exec((error) => {
                 if (error) {
                     console.error(error);
                     res.status(500).json(error);
                 } else {
-                    res.json(result)
+                    res.json(user);
                 }
             });
     }
