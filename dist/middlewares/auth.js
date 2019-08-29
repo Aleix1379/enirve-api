@@ -27,6 +27,9 @@ const requestEnsureAuth = (req, res, next) => {
         if ((req.originalUrl === '/api/v1/users' || req.originalUrl === '/api/v1/tokens') && req.method === 'POST') {
             return true;
         }
+        if (req.originalUrl.includes('/public/images/')) {
+            return true;
+        }
         return req.originalUrl.includes('/api/v1/users') && req.method === 'GET';
     }
 };

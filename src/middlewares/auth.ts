@@ -35,6 +35,10 @@ const requestEnsureAuth: express.RequestHandler = (
             return true;
         }
 
+        if (req.originalUrl.includes('/public/images/')) {
+            return true;
+        }
+
         return req.originalUrl.includes('/api/v1/users') && req.method === 'GET';
     }
 };
