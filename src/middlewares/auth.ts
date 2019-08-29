@@ -13,11 +13,10 @@ const requestEnsureAuth: express.RequestHandler = (
     let payload: any;
     let token: string;
 
-    if (withoutAuth()) {
-        return next();
-    }
-
     if (!req.headers.authorization) {
+        if (withoutAuth()) {
+            return next();
+        }
         res.status(403).send({message: 'The request doesn\'t have the authentication header'});
         next();
     } else {

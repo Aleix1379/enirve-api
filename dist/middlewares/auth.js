@@ -5,10 +5,10 @@ const requestEnsureAuth = (req, res, next) => {
     const secret = process.env.SECRET;
     let payload;
     let token;
-    if (withoutAuth()) {
-        return next();
-    }
     if (!req.headers.authorization) {
+        if (withoutAuth()) {
+            return next();
+        }
         res.status(403).send({ message: 'The request doesn\'t have the authentication header' });
         next();
     }

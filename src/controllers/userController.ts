@@ -613,16 +613,42 @@ export class UserController {
         });
     }
 
-    public findOne(req: Request, res: Response): void {
+    public async findOne(req: Request, res: Response): Promise<void> {
         const key = Object.keys(req.query)[0];
         const value = req.query[key];
+        const search = req.query.search;
 
-        UserController.findUser(key, value)
-            .then(data => res.json(data))
-            .catch(error => {
-                console.error(error);
-                res.sendStatus(404);
-            });
+        if (!search) {
+            UserController.findUser(key, value)
+                .then(data => res.json(data))
+                .catch(error => {
+                    console.error(error);
+                    res.sendStatus(404);
+                });
+        } else {
+            if (req.query.username === '') {
+                res.json([]);
+            } else {
+                const user = await UserController.findUserByCode(req.body.user.code);
+                const string = req.query.username;
+                const regex = new RegExp(string, "i");
+                UserModel.find({username: regex})
+                    .exec((error, result) => {
+                        if (error) {
+                            console.error(error);
+                            res.status(500).json(error);
+                        } else {
+                            let users = result.map(user => user.toObject());
+                            users = users.filter(
+                                (usr: User) =>
+                                    usr.code !== user.code &&
+                                    user.friends.findIndex(usrFriend => usrFriend === usr.code) === -1
+                            );
+                            res.json(users);
+                        }
+                    });
+            }
+        }
     }
 
     public updateProgress(req: Request, res: Response): void {

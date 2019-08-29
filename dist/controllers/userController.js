@@ -611,13 +611,41 @@ class UserController {
         });
     }
     findOne(req, res) {
-        const key = Object.keys(req.query)[0];
-        const value = req.query[key];
-        UserController.findUser(key, value)
-            .then(data => res.json(data))
-            .catch(error => {
-            console.error(error);
-            res.sendStatus(404);
+        return __awaiter(this, void 0, void 0, function* () {
+            const key = Object.keys(req.query)[0];
+            const value = req.query[key];
+            const search = req.query.search;
+            if (!search) {
+                UserController.findUser(key, value)
+                    .then(data => res.json(data))
+                    .catch(error => {
+                    console.error(error);
+                    res.sendStatus(404);
+                });
+            }
+            else {
+                if (req.query.username === '') {
+                    res.json([]);
+                }
+                else {
+                    const user = yield UserController.findUserByCode(req.body.user.code);
+                    const string = req.query.username;
+                    const regex = new RegExp(string, "i");
+                    UserModel.find({ username: regex })
+                        .exec((error, result) => {
+                        if (error) {
+                            console.error(error);
+                            res.status(500).json(error);
+                        }
+                        else {
+                            let users = result.map(user => user.toObject());
+                            users = users.filter((usr) => usr.code !== user.code &&
+                                user.friends.findIndex(usrFriend => usrFriend === usr.code) === -1);
+                            res.json(users);
+                        }
+                    });
+                }
+            }
         });
     }
     updateProgress(req, res) {
