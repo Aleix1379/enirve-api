@@ -613,6 +613,26 @@ export class UserController {
         });
     }
 
+    public async updateUser(req: Request, res: Response): Promise<void> {
+        const properties = ['username', 'email', 'password', 'picture'];
+        const user = await UserController.findUserByCode(req.params.id);
+        properties.forEach(property => {
+            const newValue = req.body[property];
+            if (newValue && !!newValue) {
+                user[property] = newValue;
+            }
+        });
+        const userCode: number = Number(req.params.id);
+        UserModel.updateOne({code: userCode}, user)
+            .then(() => {
+                res.json(user);
+            })
+            .catch(err => {
+                res.statusCode = 500;
+                return res.send(err);
+            });
+    }
+
     public async findOne(req: Request, res: Response): Promise<void> {
         const key = Object.keys(req.query)[0];
         const value = req.query[key];

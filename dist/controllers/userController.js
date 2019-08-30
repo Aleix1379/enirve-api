@@ -610,6 +610,27 @@ class UserController {
             }
         });
     }
+    updateUser(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const properties = ['username', 'email', 'password', 'picture'];
+            const user = yield UserController.findUserByCode(req.params.id);
+            properties.forEach(property => {
+                const newValue = req.body[property];
+                if (newValue && !!newValue) {
+                    user[property] = newValue;
+                }
+            });
+            const userCode = Number(req.params.id);
+            UserModel.updateOne({ code: userCode }, user)
+                .then(() => {
+                res.json(user);
+            })
+                .catch(err => {
+                res.statusCode = 500;
+                return res.send(err);
+            });
+        });
+    }
     findOne(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const key = Object.keys(req.query)[0];

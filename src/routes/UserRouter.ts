@@ -13,6 +13,7 @@ export class UserRouter {
 
     init(): void {
         this.router.post('/', this.userController.addUser);
+        this.router.put('/:id', this.userController.updateUser);
         this.router.get('/', this.userController.findOne);
         this.router.get('/:id', this.userController.findUserById);
         this.router.get('/:id/friends', this.userController.getFriendsByUser);
