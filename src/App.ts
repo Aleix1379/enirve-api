@@ -3,7 +3,7 @@ import * as logger from 'morgan';
 import * as bodyParser from 'body-parser';
 import UserRouter from './routes/UserRouter';
 import TokenRouter from './routes/TokenController';
-// import * as cors from 'cors';
+import * as cors from 'cors';
 import requestEnsureAuth = require('./middlewares/auth');
 import requestLogger = require('./middlewares/logger');
 
@@ -27,7 +27,14 @@ class App {
     // Configure Express middleware.
     private middleware(): void {
         console.log('middleware...');
-        // this.express.use(cors());
+        this.express.use(cors(
+            {
+                "origin": "*",
+                "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+                "preflightContinue": true,
+                "optionsSuccessStatus": 204
+            }
+        ));
         this.express.use(logger('dev'));
         this.express.use(bodyParser.json({limit: '50mb', type: 'application/json'}));
         this.express.use(bodyParser.urlencoded({extended: false}));
