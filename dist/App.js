@@ -9,6 +9,7 @@ const TokenController_1 = require("./routes/TokenController");
 const requestEnsureAuth = require("./middlewares/auth");
 const requestLogger = require("./middlewares/logger");
 const requestCors = require("./middlewares/cors");
+// import requestCors = require('./middlewares/cors');
 require('dotenv').config();
 // import requestLogger = require('./middlewares/authenticated');
 const helmet = require('helmet');

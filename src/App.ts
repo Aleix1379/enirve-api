@@ -6,7 +6,8 @@ import TokenRouter from './routes/TokenController';
 // import * as cors from 'cors';
 import requestEnsureAuth = require('./middlewares/auth');
 import requestLogger = require('./middlewares/logger');
-import requestCors = require('./middlewares/cors');
+import requestCors = require("./middlewares/cors");
+// import requestCors = require('./middlewares/cors');
 
 require('dotenv').config();
 // import requestLogger = require('./middlewares/authenticated');
