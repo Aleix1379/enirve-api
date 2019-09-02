@@ -34,7 +34,7 @@ class App {
         this.express.disable('x-powered-by');
         this.express.use(cors({
             origin: 'enirve.com',
-            allowedHeaders: ['Accept-Version', 'Authorization', 'Credentials', 'Content-Type']
+            allowedHeaders: ['Accept-Version', 'Authorization', 'authorization', 'Credentials', 'Content-Type']
         }));
         this.express.use(requestLogger);
         this.express.use(requestEnsureAuth);
