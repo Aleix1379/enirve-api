@@ -5,9 +5,10 @@ const logger = require("morgan");
 const bodyParser = require("body-parser");
 const UserRouter_1 = require("./routes/UserRouter");
 const TokenController_1 = require("./routes/TokenController");
-const cors = require("cors");
+// import * as cors from 'cors';
 const requestEnsureAuth = require("./middlewares/auth");
 const requestLogger = require("./middlewares/logger");
+const requestCors = require("./middlewares/cors");
 require('dotenv').config();
 // import requestLogger = require('./middlewares/authenticated');
 const helmet = require('helmet');
@@ -27,12 +28,13 @@ class App {
         this.express.use(bodyParser.urlencoded({ extended: false }));
         this.express.use(helmet());
         this.express.disable('x-powered-by');
-        this.express.use(cors({
-            origin: 'enirve.com',
-            allowedHeaders: ['Accept-Version', 'Authorization', 'authorization', 'Credentials', 'Content-Type']
-        }));
+        // this.express.use(cors({
+        //     origin: 'enirve.com',
+        //     allowedHeaders: ['Accept-Version', 'Authorization', 'authorization', 'Credentials', 'Content-Type']
+        // }));
         this.express.use(requestLogger);
         this.express.use(requestEnsureAuth);
+        this.express.use(requestCors);
         this.express.use('/public', express.static(__dirname + '/public'));
     }
     // Configure API endpoints.
