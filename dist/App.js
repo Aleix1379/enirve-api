@@ -5,7 +5,7 @@ const logger = require("morgan");
 const bodyParser = require("body-parser");
 const UserRouter_1 = require("./routes/UserRouter");
 const TokenController_1 = require("./routes/TokenController");
-const cors = require("cors");
+// import * as cors from 'cors';
 const requestEnsureAuth = require("./middlewares/auth");
 const requestLogger = require("./middlewares/logger");
 require('dotenv').config();
@@ -22,7 +22,7 @@ class App {
     // Configure Express middleware.
     middleware() {
         console.log('middleware...');
-        this.express.use(cors());
+        // this.express.use(cors());
         this.express.use(logger('dev'));
         this.express.use(bodyParser.json({ limit: '50mb', type: 'application/json' }));
         this.express.use(bodyParser.urlencoded({ extended: false }));
