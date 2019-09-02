@@ -22,12 +22,12 @@ class App {
     // Configure Express middleware.
     middleware() {
         console.log('middleware...');
+        this.express.use(cors());
         this.express.use(logger('dev'));
         this.express.use(bodyParser.json({ limit: '50mb', type: 'application/json' }));
         this.express.use(bodyParser.urlencoded({ extended: false }));
         this.express.use(helmet());
         this.express.disable('x-powered-by');
-        this.express.use(cors({ origin: 'https://www.enirve.com' }));
         this.express.use(requestLogger);
         this.express.use(requestEnsureAuth);
         this.express.use('/public', express.static(__dirname + '/public'));
