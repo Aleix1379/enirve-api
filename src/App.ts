@@ -6,6 +6,7 @@ import TokenRouter from './routes/TokenController';
 import * as cors from 'cors';
 import requestEnsureAuth = require('./middlewares/auth');
 import requestLogger = require('./middlewares/logger');
+
 require('dotenv').config();
 // import requestLogger = require('./middlewares/authenticated');
 const helmet = require('helmet');
@@ -31,7 +32,10 @@ class App {
         this.express.use(bodyParser.urlencoded({extended: false}));
         this.express.use(helmet());
         this.express.disable('x-powered-by');
-        this.express.use(cors());
+        this.express.use(cors({
+            origin: 'enirve.com',
+            allowedHeaders: ['Accept-Version', 'Authorization', 'Credentials', 'Content-Type']
+        }));
         this.express.use(requestLogger);
         this.express.use(requestEnsureAuth);
         this.express.use('/public', express.static(__dirname + '/public'));

@@ -27,7 +27,10 @@ class App {
         this.express.use(bodyParser.urlencoded({ extended: false }));
         this.express.use(helmet());
         this.express.disable('x-powered-by');
-        this.express.use(cors());
+        this.express.use(cors({
+            origin: 'enirve.com',
+            allowedHeaders: ['Accept-Version', 'Authorization', 'Credentials', 'Content-Type']
+        }));
         this.express.use(requestLogger);
         this.express.use(requestEnsureAuth);
         this.express.use('/public', express.static(__dirname + '/public'));
