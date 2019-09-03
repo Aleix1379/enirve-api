@@ -27,7 +27,7 @@ class App {
     // Configure Express middleware.
     private middleware(): void {
         console.log('middleware...');
-        this.express.options('*', cors());
+        this.express.use(cors());
         this.express.use(logger('dev'));
         this.express.use(bodyParser.json({limit: '50mb', type: 'application/json'}));
         this.express.use(bodyParser.urlencoded({extended: false}));
