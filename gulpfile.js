@@ -1,6 +1,6 @@
 const gulp = require('gulp');
 const ts = require('gulp-typescript');
-const JSON_FILES = ['src/*.json', 'src/**/*.json'];
+const PUBLIC_FILES = ['src/public/images/**/*'];
 
 const sourcemaps = require('gulp-sourcemaps');
 const merge = require('merge2');
@@ -32,8 +32,8 @@ gulp.task('scripts', () => {
 // });
 
 gulp.task('assets', function() {
-    return gulp.src(JSON_FILES)
-        .pipe(gulp.dest('dist'));
+    return gulp.src(PUBLIC_FILES)
+        .pipe(gulp.dest('dist/public/images'));
 });
 
 // gulp.task('default', ['watch', 'assets']);

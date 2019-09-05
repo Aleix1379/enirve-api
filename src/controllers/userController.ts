@@ -19,7 +19,7 @@ export class UserController {
                 res.status(500);
                 res.send('Error hash password');
             } else {
-                UserModel.find({}, {_id: 0, code: 1})
+                UserModel.find({}, {code: 1})
                     .sort({code: -1})
                     .limit(1)
                     .then(result => {
@@ -649,32 +649,37 @@ export class UserController {
             if (req.query.username === '') {
                 res.json([]);
             } else {
-                const user = await UserController.findUserByCode(req.body.userCode);
-                const string = req.query.username;
-                const regex = new RegExp(string, "i");
-                UserModel.find({username: regex})
-                    .exec((error, result) => {
-                        if (error) {
-                            console.error(error);
-                            res.status(500).json(error);
-                        } else {
-                            let users = result.map(user => user.toObject());
-                            users = users.filter(
-                                (usr: User) =>
-                                    usr.code !== user.code &&
-                                    user.friends.findIndex(usrFriend => usrFriend === usr.code) === -1
-                            );
-                            res.json(users);
-                        }
-                    });
+                try {
+                    const user = await UserController.findUserByCode(req.body.userConnectedCode);
+                    const string = req.query.username;
+                    const regex = new RegExp(string, "i");
+                    UserModel.find({username: regex})
+                        .exec((error, result) => {
+                            if (error) {
+                                console.error(error);
+                                res.status(500).json(error);
+                            } else {
+                                let users = result.map(user => user.toObject());
+                                users = users.filter(
+                                    (usr: User) =>
+                                        usr.code !== user.code &&
+                                        user.friends.findIndex(usrFriend => usrFriend === usr.code) === -1
+                                );
+                                res.json(users);
+                            }
+                        });
+                } catch (error) {
+                    console.error(error);
+                }
             }
         }
     }
 
     public updateProgress(req: Request, res: Response): void {
+        console.log(`update progress................`);
         const points = req.body.points;
         const activity = req.body.activity;
-        const userCode = req.body.userCode;
+        const userCode = req.params.id;
 
         UserController.findUser('code', userCode)
             .then((user: User) => {
@@ -697,7 +702,7 @@ export class UserController {
                     }
                 }
 
-                UserModel.updateOne({_id: user.id}, user)
+                UserModel.updateOne({_id: user['_id']}, user)
                     .then(() => {
                         console.log(`user:`);
                         console.log(user);
@@ -709,7 +714,10 @@ export class UserController {
                         return res.send(err);
                     });
 
-            });
+            }).catch(error => {
+            console.error("error updating progress");
+            console.error(error);
+        });
 
     }
 
@@ -760,7 +768,7 @@ export class UserController {
             UserModel
                 .find(
                     {code: {$in: user.friends}},
-                    {'progress.activity': 0, 'password': 0, '_id': 0, '__v': 0, 'validated': 0}
+                    {'progress.activity': 0, 'password': 0, '__v': 0, 'validated': 0}
                 )
                 .sort(
                     {'progress.points': -1}
@@ -865,7 +873,7 @@ export class UserController {
 
     private static findConfig(userCode: number): Promise<Config> {
         return new Promise<Config>((resolve, reject) => {
-            ConfigModel.findOne({userCode: userCode}, {_id: 0, __v: 0})
+            ConfigModel.findOne({userCode: userCode}, {__v: 0})
                 .exec((error, config: Config) => {
                     if (error) {
                         reject(error);
@@ -882,7 +890,7 @@ export class UserController {
 
     private static findUser(key: string, value: string): Promise<User> {
         return new Promise<User>((resolve, reject) => {
-            UserModel.findOne({[key]: value}, {_id: 0, __v: 0, password: 0})
+            UserModel.findOne({[key]: value}, {__v: 0, password: 0})
                 .exec((error, user) => {
                     if (error) {
                         reject(error);

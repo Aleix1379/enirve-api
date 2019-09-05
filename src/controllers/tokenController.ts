@@ -23,7 +23,7 @@ export class TokenController {
                         } else if (result) {
                             const dateExpiration = moment().add(1, 'week').unix();
                             let data = {
-                                userCode: user['code'],
+                                userConnectedCode: user['code'], // user.toObject().code,
                                 iat: moment().unix(),
                                 exp: dateExpiration
                             };

@@ -10,6 +10,7 @@ class UserRouter {
     }
     init() {
         this.router.post('/', this.userController.addUser);
+        this.router.put('/:id/progress', this.userController.updateProgress);
         this.router.put('/:id', this.userController.updateUser);
         this.router.get('/', this.userController.findOne);
         this.router.get('/:id', this.userController.findUserById);
@@ -18,7 +19,6 @@ class UserRouter {
         this.router.delete('/:id/friends/:friendId', this.userController.deleteFriend);
         this.router.get('/:id/config', this.userController.findConfigByUser);
         this.router.put('/:id/config', this.userController.updateUserConfig);
-        this.router.put('/progress', this.userController.updateProgress);
     }
 }
 exports.UserRouter = UserRouter;
