@@ -27,7 +27,7 @@ export class TokenController {
                                 iat: moment().unix(),
                                 exp: dateExpiration
                             };
-                            token = jwt.encode(data, secret);
+                            token = jwt.encode(data, secret, 'HS256');
                             res.send({
                                 userCode: user['code'],
                                 exp: dateExpiration,
