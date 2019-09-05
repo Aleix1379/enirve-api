@@ -30,7 +30,7 @@ class App {
         this.express.disable('x-powered-by');
         this.express.use(requestLogger);
         this.express.use(requestEnsureAuth);
-        this.express.use('/public', express.static(__dirname + '/public'));
+        this.express.use('/api/v1/public', express.static(__dirname + '/public'));
     }
     // Configure API endpoints.
     routes() {
