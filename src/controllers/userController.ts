@@ -649,7 +649,7 @@ export class UserController {
             if (req.query.username === '') {
                 res.json([]);
             } else {
-                const user = await UserController.findUserByCode(req.body.user.code);
+                const user = await UserController.findUserByCode(req.body.userCode);
                 const string = req.query.username;
                 const regex = new RegExp(string, "i");
                 UserModel.find({username: regex})
@@ -674,7 +674,7 @@ export class UserController {
     public updateProgress(req: Request, res: Response): void {
         const points = req.body.points;
         const activity = req.body.activity;
-        const userCode = req.body.user.code;
+        const userCode = req.body.userCode;
 
         UserController.findUser('code', userCode)
             .then((user: User) => {

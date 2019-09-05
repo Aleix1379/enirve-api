@@ -649,7 +649,7 @@ class UserController {
                     res.json([]);
                 }
                 else {
-                    const user = yield UserController.findUserByCode(req.body.user.code);
+                    const user = yield UserController.findUserByCode(req.body.userCode);
                     const string = req.query.username;
                     const regex = new RegExp(string, "i");
                     UserModel.find({ username: regex })
@@ -672,7 +672,7 @@ class UserController {
     updateProgress(req, res) {
         const points = req.body.points;
         const activity = req.body.activity;
-        const userCode = req.body.user.code;
+        const userCode = req.body.userCode;
         UserController.findUser('code', userCode)
             .then((user) => {
             if (points) {

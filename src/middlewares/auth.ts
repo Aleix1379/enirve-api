@@ -25,7 +25,7 @@ const requestEnsureAuth: express.RequestHandler = (
         if (payload.exp <= moment().unix()) {
             return res.status(401).send({message: 'The token has expired'});
         } else {
-            req.body.user = payload.user;
+            req.body.userCode = payload.userCode;
             next();
         }
     }

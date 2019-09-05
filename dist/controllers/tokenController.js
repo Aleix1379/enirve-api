@@ -21,7 +21,7 @@ class TokenController {
                     else if (result) {
                         const dateExpiration = moment().add(1, 'week').unix();
                         let data = {
-                            user: user,
+                            userCode: user['code'],
                             iat: moment().unix(),
                             exp: dateExpiration
                         };
