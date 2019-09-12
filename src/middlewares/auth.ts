@@ -17,12 +17,13 @@ const requestEnsureAuth: express.RequestHandler = (
         if (withoutAuth()) {
             return next();
         }
+        console.error('The request doesn\'t have the authentication header');
         res.status(403).send({message: 'The request doesn\'t have the authentication header'});
-        next();
     } else {
         token = req.headers.authorization.split(' ')[1];
         payload = jwt.decode(token, secret);
         if (payload.exp <= moment().unix()) {
+            console.error('The token has expired');
             return res.status(401).send({message: 'The token has expired'});
         } else {
             req.body.userConnectedCode = payload.userConnectedCode;
