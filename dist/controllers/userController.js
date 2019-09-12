@@ -611,9 +611,9 @@ class UserController {
         });
     }
     updateUser(req, res) {
-        const properties = ['username', 'email', 'password', 'picture'];
-        UserController.findUserByCode(req.params.id)
-            .then(user => {
+        return __awaiter(this, void 0, void 0, function* () {
+            const properties = ['username', 'email', 'password', 'picture'];
+            const user = yield UserController.findUserByCode(req.params.id);
             properties.forEach(property => {
                 const newValue = req.body[property];
                 if (newValue && !!newValue) {

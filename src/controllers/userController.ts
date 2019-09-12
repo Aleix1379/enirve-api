@@ -613,27 +613,25 @@ export class UserController {
         });
     }
 
-    public updateUser(req: Request, res: Response): void {
+    public async updateUser(req: Request, res: Response): Promise<void> {
         const properties = ['username', 'email', 'password', 'picture'];
-        UserController.findUserByCode(req.params.id)
-            .then(user => {
-                properties.forEach(property => {
-                    const newValue = req.body[property];
-                    if (newValue && !!newValue) {
-                        user[property] = newValue;
-                    }
-                });
-                const userCode: number = Number(req.params.id);
-                UserModel.updateOne({code: userCode}, user)
-                    .then(() => {
-                        res.json(user);
-                    })
-                    .catch(err => {
-                        // res.statusCode = 500;
-                        console.error(`ERROR updateUser`);
-                        console.error(err);
-                        res.send(err);
-                    });
+        const user = await UserController.findUserByCode(req.params.id);
+        properties.forEach(property => {
+            const newValue = req.body[property];
+            if (newValue && !!newValue) {
+                user[property] = newValue;
+            }
+        });
+        const userCode: number = Number(req.params.id);
+        UserModel.updateOne({code: userCode}, user)
+            .then(() => {
+                res.json(user);
+            })
+            .catch(err => {
+                // res.statusCode = 500;
+                console.error(`ERROR updateUser`);
+                console.error(err);
+                res.send(err);
             });
     }
 
