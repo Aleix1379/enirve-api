@@ -626,7 +626,9 @@ class UserController {
                 res.json(user);
             })
                 .catch(err => {
-                res.statusCode = 500;
+                // res.statusCode = 500;
+                console.error(`ERROR updateUser`);
+                console.error(err);
                 return res.send(err);
             });
         });
