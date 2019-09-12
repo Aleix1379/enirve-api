@@ -612,25 +612,34 @@ class UserController {
     }
     updateUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const properties = ['username', 'email', 'password', 'picture'];
-            const user = yield UserController.findUserByCode(req.params.id);
-            properties.forEach(property => {
-                const newValue = req.body[property];
-                if (newValue && !!newValue) {
-                    user[property] = newValue;
+            bcrypt.hash(req.body.password, null, null, (err, hash) => __awaiter(this, void 0, void 0, function* () {
+                if (err) {
+                    console.error(`ERROR update user hash password`);
+                    console.error(err);
+                    res.status(500);
+                    return res.send(err);
                 }
-            });
-            const userCode = Number(req.params.id);
-            UserModel.updateOne({ code: userCode }, user)
-                .then(() => {
-                res.send(user);
-            })
-                .catch(err => {
-                // res.statusCode = 500;
-                console.error(`ERROR updateUser`);
-                console.error(err);
-                res.send(err);
-            });
+                req.body.password = hash;
+                const properties = ['username', 'email', 'password', 'picture'];
+                const user = yield UserController.findUserByCode(req.params.id);
+                properties.forEach(property => {
+                    const newValue = req.body[property];
+                    if (newValue && !!newValue) {
+                        user[property] = newValue;
+                    }
+                });
+                const userCode = Number(req.params.id);
+                UserModel.updateOne({ code: userCode }, user)
+                    .then(() => {
+                    res.send(user);
+                })
+                    .catch(err => {
+                    // res.statusCode = 500;
+                    console.error(`ERROR updateUser`);
+                    console.error(err);
+                    res.send(err);
+                });
+            }));
         });
     }
     findOne(req, res) {

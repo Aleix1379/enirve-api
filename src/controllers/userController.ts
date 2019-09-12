@@ -614,25 +614,34 @@ export class UserController {
     }
 
     public async updateUser(req: Request, res: Response): Promise<void> {
-        const properties = ['username', 'email', 'password', 'picture'];
-        const user = await UserController.findUserByCode(req.params.id);
-        properties.forEach(property => {
-            const newValue = req.body[property];
-            if (newValue && !!newValue) {
-                user[property] = newValue;
-            }
-        });
-        const userCode: number = Number(req.params.id);
-        UserModel.updateOne({code: userCode}, user)
-            .then(() => {
-                res.send(user);
-            })
-            .catch(err => {
-                // res.statusCode = 500;
-                console.error(`ERROR updateUser`);
+        bcrypt.hash(req.body.password, null, null, async (err, hash) => {
+            if (err) {
+                console.error(`ERROR update user hash password`);
                 console.error(err);
-                res.send(err);
+                res.status(500);
+                return res.send(err);
+            }
+            req.body.password = hash;
+            const properties = ['username', 'email', 'password', 'picture'];
+            const user = await UserController.findUserByCode(req.params.id);
+            properties.forEach(property => {
+                const newValue = req.body[property];
+                if (newValue && !!newValue) {
+                    user[property] = newValue;
+                }
             });
+            const userCode: number = Number(req.params.id);
+            UserModel.updateOne({code: userCode}, user)
+                .then(() => {
+                    res.send(user);
+                })
+                .catch(err => {
+                    // res.statusCode = 500;
+                    console.error(`ERROR updateUser`);
+                    console.error(err);
+                    res.send(err);
+                });
+        });
     }
 
     public async findOne(req: Request, res: Response): Promise<void> {
