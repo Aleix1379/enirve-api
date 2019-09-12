@@ -623,7 +623,7 @@ class UserController {
             const userCode = Number(req.params.id);
             UserModel.updateOne({ code: userCode }, user)
                 .then(() => {
-                res.json(user);
+                res.send(user);
             })
                 .catch(err => {
                 // res.statusCode = 500;
