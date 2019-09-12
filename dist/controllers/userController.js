@@ -631,7 +631,9 @@ class UserController {
                 const userCode = Number(req.params.id);
                 UserModel.updateOne({ code: userCode }, user)
                     .then(() => {
-                    res.send(user);
+                    const result = Object.assign({}, user);
+                    delete result['password'];
+                    res.send(result);
                 })
                     .catch(err => {
                     // res.statusCode = 500;
