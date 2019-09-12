@@ -629,7 +629,7 @@ class UserController {
                 // res.statusCode = 500;
                 console.error(`ERROR updateUser`);
                 console.error(err);
-                return res.send(err);
+                res.send(err);
             });
         });
     }
@@ -708,6 +708,7 @@ class UserController {
                 res.json(user);
             })
                 .catch(err => {
+                console.log('ERROR updateProgress');
                 res.statusCode = 403;
                 return res.send(err);
             });
@@ -751,6 +752,7 @@ class UserController {
             ConfigModel.updateOne({ userCode: Number(req.params.id) }, config)
                 .exec((error, config) => {
                 if (error) {
+                    console.log('ERROR updateUserConfig');
                     console.error(error);
                     res.status(500).json(error);
                 }
