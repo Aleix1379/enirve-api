@@ -614,36 +614,39 @@ export class UserController {
     }
 
     public async updateUser(req: Request, res: Response): Promise<void> {
-        bcrypt.hash(req.body.password, null, null, async (err, hash) => {
-            if (err) {
+        if (req.body.password) {
+            try {
+                req.body.password = await this.hash(req.body.password);
+            } catch (err) {
                 console.error(`ERROR update user hash password`);
                 console.error(err);
                 res.status(500);
-                return res.send(err);
+                res.send(err);
+                return null;
             }
-            req.body.password = hash;
-            const properties = ['username', 'email', 'password', 'picture'];
-            const user = await UserController.findUserByCode(req.params.id);
-            properties.forEach(property => {
-                const newValue = req.body[property];
-                if (newValue && !!newValue) {
-                    user[property] = newValue;
-                }
-            });
-            const userCode: number = Number(req.params.id);
-            UserModel.updateOne({code: userCode}, user)
-                .then(() => {
-                    const result = {...user};
-                    delete result['password'];
-                    res.send(result);
-                })
-                .catch(err => {
-                    // res.statusCode = 500;
-                    console.error(`ERROR updateUser`);
-                    console.error(err);
-                    res.send(err);
-                });
+        }
+
+        const properties = ['username', 'email', 'password', 'picture'];
+        const user = await UserController.findUserByCode(req.params.id);
+        properties.forEach(property => {
+            const newValue = req.body[property];
+            if (newValue && !!newValue) {
+                user[property] = newValue;
+            }
         });
+        const userCode: number = Number(req.params.id);
+        UserModel.updateOne({code: userCode}, user)
+            .then(() => {
+                const result = {...user};
+                delete result['password'];
+                res.send(result);
+            })
+            .catch(err => {
+                // res.statusCode = 500;
+                console.error(`ERROR updateUser`);
+                console.error(err);
+                res.send(err);
+            });
     }
 
     public async findOne(req: Request, res: Response): Promise<void> {
@@ -915,6 +918,18 @@ export class UserController {
                         reject('User not found');
                     }
                 });
+        });
+    }
+
+    private hash(password): Promise<string> {
+        return new Promise((resolve, reject) => {
+            bcrypt.hash(password, null, null, (err, hash) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(hash);
+                }
+            });
         });
     }
 
