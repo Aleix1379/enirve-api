@@ -666,7 +666,6 @@ export class UserController {
                 res.json([]);
             } else {
                 try {
-                    const user = await UserController.findUserByCode(req.body.userConnectedCode);
                     const string = req.query.username;
                     const regex = new RegExp(string, "i");
                     UserModel.find({username: regex})
@@ -675,13 +674,7 @@ export class UserController {
                                 console.error(error);
                                 res.status(500).json(error);
                             } else {
-                                let users = result.map(user => user.toObject());
-                                users = users.filter(
-                                    (usr: User) =>
-                                        usr.code !== user.code &&
-                                        user.friends.findIndex(usrFriend => usrFriend === usr.code) === -1
-                                );
-                                res.json(users);
+                                res.json(result.map(user => user.toObject()));
                             }
                         });
                 } catch (error) {
