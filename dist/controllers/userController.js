@@ -614,7 +614,7 @@ class UserController {
         return __awaiter(this, void 0, void 0, function* () {
             if (req.body.password) {
                 try {
-                    req.body.password = yield this.hash(req.body.password);
+                    req.body.password = yield UserController.hash(req.body.password);
                 }
                 catch (err) {
                     console.error(`ERROR update user hash password`);
@@ -910,7 +910,7 @@ class UserController {
             });
         });
     }
-    hash(password) {
+    static hash(password) {
         return new Promise((resolve, reject) => {
             bcrypt.hash(password, null, null, (err, hash) => {
                 if (err) {

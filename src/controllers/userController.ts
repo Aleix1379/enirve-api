@@ -616,7 +616,7 @@ export class UserController {
     public async updateUser(req: Request, res: Response): Promise<void> {
         if (req.body.password) {
             try {
-                req.body.password = await this.hash(req.body.password);
+                req.body.password = await UserController.hash(req.body.password);
             } catch (err) {
                 console.error(`ERROR update user hash password`);
                 console.error(err);
@@ -921,7 +921,7 @@ export class UserController {
         });
     }
 
-    private hash(password): Promise<string> {
+    private static hash(password): Promise<string> {
         return new Promise((resolve, reject) => {
             bcrypt.hash(password, null, null, (err, hash) => {
                 if (err) {
