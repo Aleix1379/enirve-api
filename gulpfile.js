@@ -1,6 +1,7 @@
 const gulp = require('gulp');
 const ts = require('gulp-typescript');
 const PUBLIC_FILES = ['src/public/images/**/*'];
+const CONFIG_FILES = ['config/**/*'];
 
 const sourcemaps = require('gulp-sourcemaps');
 const merge = require('merge2');
@@ -35,5 +36,12 @@ gulp.task('assets', function() {
     return gulp.src(PUBLIC_FILES)
         .pipe(gulp.dest('dist/public/images'));
 });
+
+gulp.task('config', function() {
+    return gulp.src(CONFIG_FILES)
+        .pipe(gulp.dest('dist/config'));
+});
+
+
 
 // gulp.task('default', ['watch', 'assets']);
