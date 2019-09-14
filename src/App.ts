@@ -6,6 +6,7 @@ import TokenRouter from './routes/TokenController';
 import * as cors from 'cors';
 import requestEnsureAuth = require('./middlewares/auth');
 import requestLogger = require('./middlewares/logger');
+const config = require('config');
 
 require('dotenv').config();
 // import requestLogger = require('./middlewares/authenticated');
@@ -35,7 +36,7 @@ class App {
         this.express.disable('x-powered-by');
         this.express.use(requestLogger);
         this.express.use(requestEnsureAuth);
-        this.express.use('/api/v1/public', express.static(__dirname + '/public'));
+        this.express.use('/api/v1/public', express.static(config.get('PUBLIC_DIR')));
     }
 
     // Configure API endpoints.

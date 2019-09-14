@@ -13,6 +13,7 @@ const fs = require("fs");
 const bcrypt = require("bcrypt-nodejs");
 const user_1 = require("../models/user");
 const config_1 = require("../models/config");
+const config = require('config');
 const UserModel = mongoose.model('User', user_1.UserSchema);
 const ConfigModel = mongoose.model('Config', config_1.ConfigSchema);
 class UserController {
@@ -35,17 +36,11 @@ class UserController {
                     let fileName;
                     const defaultImage = 'user-default.png';
                     if (req.body.picture === defaultImage) {
-                        fileName = req.body.picture;
+                        fileName = defaultImage;
                     }
                     else {
                         fileName = `${req.body.username}.png`;
-                    }
-                    if (fileName !== defaultImage) {
-                        fs.writeFile(`public/images/${fileName}`, req.body.picture.replace(/^data:image\/png;base64,/, ''), 'base64', (err) => {
-                            if (err) {
-                                console.error(err);
-                            }
-                        });
+                        UserController.savePicture(fileName, req.body.picture);
                     }
                     ConfigModel.create({
                         userCode: code
@@ -624,6 +619,18 @@ class UserController {
                     return null;
                 }
             }
+            if (req.body.picture) {
+                let fileName;
+                const defaultImage = 'user-default.png';
+                if (req.body.picture === defaultImage) {
+                    fileName = defaultImage;
+                }
+                else {
+                    fileName = `${req.body.username}.png`;
+                    UserController.savePicture(fileName, req.body.picture.repeat(1));
+                }
+                req.body.picture = fileName;
+            }
             const properties = ['username', 'email', 'password', 'picture'];
             const user = yield UserController.findUserByCode(req.params.id);
             properties.forEach(property => {
@@ -916,6 +923,13 @@ class UserController {
                     resolve(hash);
                 }
             });
+        });
+    }
+    static savePicture(fileName, image) {
+        fs.writeFile(`${config.get('IMAGES_DIR')}${fileName}`, image.replace(/^data:image\/png;base64,/, ''), 'base64', (err) => {
+            if (err) {
+                console.error(err);
+            }
         });
     }
 }

@@ -8,6 +8,7 @@ const TokenController_1 = require("./routes/TokenController");
 const cors = require("cors");
 const requestEnsureAuth = require("./middlewares/auth");
 const requestLogger = require("./middlewares/logger");
+const config = require('config');
 require('dotenv').config();
 // import requestLogger = require('./middlewares/authenticated');
 const helmet = require('helmet');
@@ -30,7 +31,7 @@ class App {
         this.express.disable('x-powered-by');
         this.express.use(requestLogger);
         this.express.use(requestEnsureAuth);
-        this.express.use('/api/v1/public', express.static(__dirname + '/public'));
+        this.express.use('/api/v1/public', express.static(config.get('PUBLIC_DIR')));
     }
     // Configure API endpoints.
     routes() {

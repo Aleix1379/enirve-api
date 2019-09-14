@@ -6,6 +6,7 @@ import {User} from '../interfaces/User';
 import {UserSchema} from '../models/user';
 import {ConfigSchema} from "../models/config";
 import {Config} from "../interfaces/Config";
+const config = require('config');
 
 const UserModel = mongoose.model('User', UserSchema);
 const ConfigModel = mongoose.model('Config', ConfigSchema);
@@ -32,20 +33,10 @@ export class UserController {
                         const defaultImage = 'user-default.png';
 
                         if (req.body.picture === defaultImage) {
-                            fileName = req.body.picture;
+                            fileName = defaultImage;
                         } else {
                             fileName = `${req.body.username}.png`;
-                        }
-
-                        if (fileName !== defaultImage) {
-                            fs.writeFile(
-                                `public/images/${fileName}`,
-                                req.body.picture.replace(/^data:image\/png;base64,/, ''), 'base64', (err) => {
-                                    if (err) {
-                                        console.error(err);
-                                    }
-                                }
-                            );
+                            UserController.savePicture(fileName, req.body.picture);
                         }
 
                         ConfigModel.create({
@@ -626,6 +617,19 @@ export class UserController {
             }
         }
 
+        if (req.body.picture) {
+            let fileName: string;
+            const defaultImage = 'user-default.png';
+
+            if (req.body.picture === defaultImage) {
+                fileName = defaultImage;
+            } else {
+                fileName = `${req.body.username}.png`;
+                UserController.savePicture(fileName, req.body.picture.repeat(1));
+            }
+            req.body.picture = fileName;
+        }
+
         const properties = ['username', 'email', 'password', 'picture'];
         const user = await UserController.findUserByCode(req.params.id);
         properties.forEach(property => {
@@ -924,6 +928,17 @@ export class UserController {
                 }
             });
         });
+    }
+
+    private static savePicture(fileName: string, image: string) {
+        fs.writeFile(
+            `${config.get('IMAGES_DIR')}${fileName}`,
+            image.replace(/^data:image\/png;base64,/, ''), 'base64', (err) => {
+                if (err) {
+                    console.error(err);
+                }
+            }
+        );
     }
 
 }
