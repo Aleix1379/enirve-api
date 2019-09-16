@@ -6,6 +6,7 @@ import {User} from '../interfaces/User';
 import {UserSchema} from '../models/user';
 import {ConfigSchema} from "../models/config";
 import {Config} from "../interfaces/Config";
+
 const config = require('config');
 
 const UserModel = mongoose.model('User', UserSchema);
@@ -617,12 +618,17 @@ export class UserController {
             }
         }
 
+        const user = await UserController.findUserByCode(req.params.id);
+
         if (req.body.picture) {
             let fileName: string;
             const defaultImage = 'user-default.png';
 
             if (req.body.picture === defaultImage) {
                 fileName = defaultImage;
+            } else if (req.body.picture === `${user.username}.png`) {
+                fileName = `${req.body.username}.png`;
+                UserController.renamePicture(req.body.picture, fileName);
             } else {
                 fileName = `${req.body.username}.png`;
                 UserController.savePicture(fileName, req.body.picture.repeat(1));
@@ -631,7 +637,6 @@ export class UserController {
         }
 
         const properties = ['username', 'email', 'password', 'picture'];
-        const user = await UserController.findUserByCode(req.params.id);
         properties.forEach(property => {
             const newValue = req.body[property];
             if (newValue && !!newValue) {
@@ -932,8 +937,10 @@ export class UserController {
 
     private static savePicture(fileName: string, image: string) {
         fs.writeFile(
-            `${config.get('IMAGES_DIR')}${fileName}`,
-            image.replace(/^data:image\/png;base64,/, ''), 'base64', (err) => {
+            UserController.getImagePath(fileName),
+            image.replace(/^data:image\/png;base64,/, ''),
+            'base64',
+            (err) => {
                 if (err) {
                     console.error(err);
                 }
@@ -941,4 +948,17 @@ export class UserController {
         );
     }
 
+    private static renamePicture(oldName: string, newName: string) {
+        fs.rename(
+            UserController.getImagePath(oldName),
+            UserController.getImagePath(newName),
+            (err) => {
+                if (err) console.log('ERROR: ' + err);
+            }
+        );
+    }
+
+    private static getImagePath(imageName: string): string {
+        return `${config.get('IMAGES_DIR')}${imageName}`;
+    }
 }

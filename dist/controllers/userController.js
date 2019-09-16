@@ -619,11 +619,16 @@ class UserController {
                     return null;
                 }
             }
+            const user = yield UserController.findUserByCode(req.params.id);
             if (req.body.picture) {
                 let fileName;
                 const defaultImage = 'user-default.png';
                 if (req.body.picture === defaultImage) {
                     fileName = defaultImage;
+                }
+                else if (req.body.picture === `${user.username}.png`) {
+                    fileName = `${req.body.username}.png`;
+                    UserController.renamePicture(req.body.picture, fileName);
                 }
                 else {
                     fileName = `${req.body.username}.png`;
@@ -632,7 +637,6 @@ class UserController {
                 req.body.picture = fileName;
             }
             const properties = ['username', 'email', 'password', 'picture'];
-            const user = yield UserController.findUserByCode(req.params.id);
             properties.forEach(property => {
                 const newValue = req.body[property];
                 if (newValue && !!newValue) {
@@ -926,11 +930,20 @@ class UserController {
         });
     }
     static savePicture(fileName, image) {
-        fs.writeFile(`${config.get('IMAGES_DIR')}${fileName}`, image.replace(/^data:image\/png;base64,/, ''), 'base64', (err) => {
+        fs.writeFile(UserController.getImagePath(fileName), image.replace(/^data:image\/png;base64,/, ''), 'base64', (err) => {
             if (err) {
                 console.error(err);
             }
         });
+    }
+    static renamePicture(oldName, newName) {
+        fs.rename(UserController.getImagePath(oldName), UserController.getImagePath(newName), (err) => {
+            if (err)
+                console.log('ERROR: ' + err);
+        });
+    }
+    static getImagePath(imageName) {
+        return `${config.get('IMAGES_DIR')}${imageName}`;
     }
 }
 exports.UserController = UserController;

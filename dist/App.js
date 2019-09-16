@@ -25,7 +25,7 @@ class App {
         console.log('middleware...');
         this.express.use(cors());
         this.express.use(logger('dev'));
-        this.express.use(bodyParser.json({ limit: '50mb', type: 'application/json' }));
+        this.express.use(bodyParser.json({ limit: '80mb', type: 'application/json' }));
         this.express.use(bodyParser.urlencoded({ extended: false }));
         this.express.use(helmet());
         this.express.disable('x-powered-by');
