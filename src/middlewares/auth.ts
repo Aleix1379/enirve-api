@@ -21,7 +21,13 @@ const requestEnsureAuth: express.RequestHandler = (
         res.status(403).send({message: 'The request doesn\'t have the authentication header'});
     } else {
         token = req.headers.authorization.split(' ')[1];
-        payload = jwt.decode(token, secret);
+        try {
+            payload = jwt.decode(token, secret);
+        } catch (err) {
+            console.log('try cath decode token');
+            console.log(err);
+            return res.status(401).send({message: 'The token has expired'});
+        }
         if (payload.exp <= moment().unix()) {
             console.error('The token has expired');
             return res.status(401).send({message: 'The token has expired'});
